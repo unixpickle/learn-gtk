@@ -1,4 +1,4 @@
-CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0)
+CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0) -lm
 
 all: build build/button_catcher build/img_puzzle
 
