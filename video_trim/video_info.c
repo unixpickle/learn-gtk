@@ -111,9 +111,15 @@ gboolean cut_video_internal(const char* inPath,
         ((double)packet.dts * (double)timeBase.num) / (double)timeBase.den;
     double pts =
         ((double)packet.pts * (double)timeBase.num) / (double)timeBase.den;
+
+    float* progress = (float*)g_malloc(sizeof(float));
+    *progress = (float)MAX(0, MIN((dts - start) / (end - start), 1));
+    g_main_context_invoke_full(NULL, 0, progressCb, progress, g_free);
+
     if (dts > end) {
       break;
     }
+
     timeBase = outCtx->streams[packet.stream_index]->time_base;
     packet.dts =
         (int64_t)((dts - start) * (double)timeBase.den / (double)timeBase.num);
