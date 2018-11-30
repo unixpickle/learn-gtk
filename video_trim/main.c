@@ -53,6 +53,8 @@ static void activate(GtkApplication* app, gpointer userData) {
   trimButton = gtk_button_new_with_label("Trim Video");
   g_signal_connect(trimButton, "clicked", G_CALLBACK(handle_trim_clicked),
                    NULL);
+  gtk_widget_set_sensitive(trimButton, FALSE);
+
   progressBar = gtk_progress_bar_new();
 
   GtkWidget* rootContainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -68,7 +70,7 @@ static void activate(GtkApplication* app, gpointer userData) {
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Video Trim");
-  gtk_window_set_default_size(GTK_WINDOW(window), 500, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 500, 100);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_widget_add_events(window, GDK_KEY_PRESS_MASK | GDK_BUTTON_PRESS_MASK |
                                     GDK_POINTER_MOTION_MASK);
@@ -96,6 +98,11 @@ static void handle_file_set(GtkWidget* widget, gpointer userData) {
     gtk_range_set_range(GTK_RANGE(endScale), 0, duration);
   } else {
     toggle_controls(FALSE);
+    GtkWidget* dialog = gtk_message_dialog_new(
+        GTK_WINDOW(window), 0, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+        "Failed to get video length.");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
   }
   g_free(path);
 }
@@ -142,8 +149,11 @@ static gboolean cut_video_callback(gpointer progressPtr) {
     toggle_controls(TRUE);
     gtk_widget_set_sensitive(fileChooser, TRUE);
     if (progress == PROGRESS_FAILURE) {
-      printf("error!\n");
-      // TODO: show error here.
+      GtkWidget* dialog =
+          gtk_message_dialog_new(GTK_WINDOW(window), 0, GTK_MESSAGE_ERROR,
+                                 GTK_BUTTONS_CLOSE, "Failed to trim video.");
+      gtk_dialog_run(GTK_DIALOG(dialog));
+      gtk_widget_destroy(dialog);
     }
   } else {
     gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(progressBar),

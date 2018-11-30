@@ -91,7 +91,9 @@ gboolean cut_video_internal(const char* inPath,
     outStream->codecpar->codec_tag = 0;
   }
 
-  avio_open(&outCtx->pb, outPath, AVIO_FLAG_WRITE);
+  if (avio_open(&outCtx->pb, outPath, AVIO_FLAG_WRITE) < 0) {
+    goto fail;
+  }
   if (avformat_init_output(outCtx, NULL) < 0) {
     goto fail;
   }
