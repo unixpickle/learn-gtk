@@ -1,12 +1,15 @@
 CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0) -lm
 
-all: build build/button_catcher build/img_puzzle
+all: build build/button_catcher build/img_puzzle build/video_trim
 
 build/button_catcher: button_catcher/main.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 build/img_puzzle: img_puzzle/main.c
 	$(CC) -o $@ $^ $(CFLAGS)
+
+build/video_trim: video_trim/main.c video_trim/video_info.c
+	$(CC) -o $@ $^ $(CFLAGS) $(shell pkg-config --cflags --libs libavformat) -Ivideo_trim
 
 build:
 	mkdir build
