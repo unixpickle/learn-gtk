@@ -89,7 +89,6 @@ gboolean cut_video_internal(const char* inPath,
         outCtx, avcodec_find_encoder(inStream->codecpar->codec_id));
     avcodec_parameters_copy(outStream->codecpar, inStream->codecpar);
     outStream->codecpar->codec_tag = 0;
-    outStream->time_base = inStream->time_base;
   }
 
   avio_open(&outCtx->pb, outPath, AVIO_FLAG_WRITE);
@@ -100,19 +99,27 @@ gboolean cut_video_internal(const char* inPath,
     goto fail;
   }
 
-  // int64_t startTime = (int64_t)(startTime * (double)AV_TIME_BASE);
-  // if (av_seek_frame(inCtx, -1, startTime, 0) < 0) {
-  //   goto fail;
-  // }
+  int64_t startTime = (int64_t)(start * (double)AV_TIME_BASE);
+  if (av_seek_frame(inCtx, -1, startTime, 0) < 0) {
+    goto fail;
+  }
   AVPacket packet;
   av_init_packet(&packet);
   while (av_read_frame(inCtx, &packet) >= 0) {
     AVRational timeBase = inCtx->streams[packet.stream_index]->time_base;
-    double timestamp =
+    double dts =
         ((double)packet.dts * (double)timeBase.num) / (double)timeBase.den;
-    printf("%lf %lf %lf\n", timestamp, start, end);
-    if (timestamp > end) {
+    double pts =
+        ((double)packet.pts * (double)timeBase.num) / (double)timeBase.den;
+    if (dts > end) {
       break;
+    }
+    timeBase = outCtx->streams[packet.stream_index]->time_base;
+    packet.dts =
+        (int64_t)((dts - start) * (double)timeBase.den / (double)timeBase.num);
+    if (packet.pts != AV_NOPTS_VALUE) {
+      packet.pts = (int64_t)((pts - start) * (double)timeBase.den /
+                             (double)timeBase.num);
     }
     av_write_frame(outCtx, &packet);
   }
