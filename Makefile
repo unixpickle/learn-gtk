@@ -1,4 +1,4 @@
-CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0) -lm
+CFLAGS=$(shell pkg-config --cflags --libs gtk+-3.0) -lm -lpthread
 
 all: build build/button_catcher build/img_puzzle build/video_trim
 
@@ -9,7 +9,7 @@ build/img_puzzle: img_puzzle/main.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 build/video_trim: video_trim/main.c video_trim/video_info.c
-	$(CC) -o $@ $^ $(CFLAGS) $(shell pkg-config --cflags --libs libavformat) -Ivideo_trim
+	$(CC) -o $@ $^ $(CFLAGS) $(shell pkg-config --cflags --libs libavformat libavcodec) -Ivideo_trim
 
 build:
 	mkdir build
