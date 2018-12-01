@@ -109,6 +109,9 @@ gboolean cut_video_internal(const char* inPath,
   av_init_packet(&packet);
   while (av_read_frame(inCtx, &packet) >= 0) {
     AVRational timeBase = inCtx->streams[packet.stream_index]->time_base;
+    if (packet.pts == AV_NOPTS_VALUE) {
+      packet.pts = packet.dts;
+    }
     double dts =
         ((double)packet.dts * (double)timeBase.num) / (double)timeBase.den;
     double pts =
@@ -125,10 +128,8 @@ gboolean cut_video_internal(const char* inPath,
     timeBase = outCtx->streams[packet.stream_index]->time_base;
     packet.dts =
         (int64_t)((dts - start) * (double)timeBase.den / (double)timeBase.num);
-    if (packet.pts != AV_NOPTS_VALUE) {
-      packet.pts = (int64_t)((pts - start) * (double)timeBase.den /
-                             (double)timeBase.num);
-    }
+    packet.pts =
+        (int64_t)((pts - start) * (double)timeBase.den / (double)timeBase.num);
     av_write_frame(outCtx, &packet);
   }
 
