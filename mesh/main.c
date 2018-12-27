@@ -38,14 +38,14 @@ static gboolean drawing_area_draw(GtkWidget* widget,
   cairo_set_source_rgb(c, 1, 1, 1);
   cairo_paint(c);
 
-  cairo_set_source_rgb(c, 0.5, 0.5, 0.5);
-  for (int i = 0; i < mesh->num_springs; ++i) {
-    struct spring* s = &mesh->springs[i];
-    cairo_new_sub_path(c);
-    cairo_move_to(c, s->p1->x, s->p1->y);
-    cairo_line_to(c, s->p2->x, s->p2->y);
-    cairo_stroke(c);
-  }
+  // cairo_set_source_rgb(c, 0.5, 0.5, 0.5);
+  // for (int i = 0; i < mesh->num_springs; ++i) {
+  //   struct spring* s = &mesh->springs[i];
+  //   cairo_new_sub_path(c);
+  //   cairo_move_to(c, s->p1->x, s->p1->y);
+  //   cairo_line_to(c, s->p2->x, s->p2->y);
+  //   cairo_stroke(c);
+  // }
 
   cairo_set_source_rgb(c, 0, 0, 0);
   for (int i = 0; i < mesh->num_particles; ++i) {
@@ -106,7 +106,7 @@ static gboolean mouse_moved(GtkWidget* widget,
 }
 
 static void activate(GtkApplication* app, gpointer userData) {
-  mesh = mesh_new_grid(30.0f, 20.0f, 20.0f, 13, 13);
+  mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f);
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Mesh");

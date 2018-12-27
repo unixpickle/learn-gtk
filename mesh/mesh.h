@@ -29,6 +29,12 @@ struct mesh {
 float particle_distance(struct particle* p1, struct particle* p2);
 
 struct mesh* mesh_new_grid(float spacing, float x, float y, int rows, int cols);
+struct mesh* mesh_new_fc(float spacing,
+                         float x,
+                         float y,
+                         int rows,
+                         int cols,
+                         float max_dist);
 void mesh_step(struct mesh* m, float time_frac);
 void mesh_free(struct mesh* m);
 
