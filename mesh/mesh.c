@@ -72,7 +72,7 @@ struct mesh* mesh_new_fc(float spacing,
   mesh->springs = malloc(sizeof(struct spring) *
                          (mesh->num_particles * mesh->num_particles / 2 + 1));
 
-  mesh->max_vel = 100;
+  mesh->max_vel = 200;
   mesh->damping = 0.5;
 
   for (int i = 0; i < rows; ++i) {
@@ -91,7 +91,7 @@ struct mesh* mesh_new_fc(float spacing,
           s->p1 = p1;
           s->p2 = p;
           s->base_len = particle_distance(p, p1);
-          s->k = 1.0 / s->base_len;
+          s->k = 10.0 / s->base_len;
         }
       }
     }
