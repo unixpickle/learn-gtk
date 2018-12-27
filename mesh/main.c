@@ -51,7 +51,7 @@ static gboolean drawing_area_draw(GtkWidget* widget,
   for (int i = 0; i < mesh->num_particles; ++i) {
     struct particle* p = &mesh->particles[i];
     cairo_new_sub_path(c);
-    cairo_arc(c, p->x, p->y, 5, 0, (float)M_PI * 2.0f);
+    cairo_arc(c, p->x, p->y, p->is_edge ? 5 : 2, 0, (float)M_PI * 2.0f);
     cairo_close_path(c);
     cairo_fill(c);
   }

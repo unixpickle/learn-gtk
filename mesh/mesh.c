@@ -35,6 +35,7 @@ struct mesh* mesh_new_grid(float spacing,
       p->y = y + (float)i * spacing;
       p->vx = 0;
       p->vy = 0;
+      p->is_edge = (i == 0 || i == rows - 1) && (j == 0 || j == cols - 1);
 
 #define ADD_SPRING                                 \
   struct spring* s = &mesh->springs[spring_idx++]; \
@@ -82,6 +83,7 @@ struct mesh* mesh_new_fc(float spacing,
       p->y = y + (float)i * spacing;
       p->vx = 0;
       p->vy = 0;
+      p->is_edge = (i == 0 || i == rows - 1) || (j == 0 || j == cols - 1);
 
       for (int k = 0; k < i * cols + j; ++k) {
         struct particle* p1 = &mesh->particles[k];

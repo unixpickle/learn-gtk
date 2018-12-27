@@ -6,6 +6,7 @@ struct particle {
   float y;
   float vx;
   float vy;
+  char is_edge;
 };
 
 struct spring {
