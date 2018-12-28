@@ -36,6 +36,11 @@ struct mesh* mesh_new_fc(float spacing,
                          int rows,
                          int cols,
                          float max_dist);
+struct mesh* mesh_new_edge_conn(float spacing,
+                                float x,
+                                float y,
+                                int rows,
+                                int cols);
 void mesh_step(struct mesh* m, float time_frac);
 void mesh_free(struct mesh* m);
 

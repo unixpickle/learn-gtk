@@ -101,6 +101,55 @@ struct mesh* mesh_new_fc(float spacing,
   return mesh;
 }
 
+struct mesh* mesh_new_edge_conn(float spacing,
+                                float x,
+                                float y,
+                                int rows,
+                                int cols) {
+  struct mesh* mesh = malloc(sizeof(struct mesh));
+  bzero(mesh, sizeof(struct mesh));
+  mesh->num_particles = rows * cols;
+  mesh->particles = malloc(sizeof(struct particle) * mesh->num_particles);
+  mesh->num_springs = 0;
+  mesh->springs = malloc(sizeof(struct spring) *
+                         ((rows * 2 + cols * 2 - 4) * mesh->num_particles));
+
+  mesh->max_vel = 200;
+  mesh->damping = 0.5;
+
+  for (int i = 0; i < rows; ++i) {
+    for (int j = 0; j < cols; ++j) {
+      struct particle* p = &mesh->particles[i * cols + j];
+      p->x = x + (float)j * spacing;
+      p->y = y + (float)i * spacing;
+      p->vx = 0;
+      p->vy = 0;
+      p->is_edge = (i == 0 || i == rows - 1) || (j == 0 || j == cols - 1);
+    }
+  }
+  for (int i = 0; i < mesh->num_particles; ++i) {
+    struct particle* p1 = &mesh->particles[i];
+    if (!p1->is_edge) {
+      continue;
+    }
+    for (int j = 0; j < mesh->num_particles; ++j) {
+      if (i == j) {
+        continue;
+      }
+      struct particle* p2 = &mesh->particles[j];
+      struct spring* s = &mesh->springs[mesh->num_springs++];
+      s->p1 = p1;
+      s->p2 = p2;
+      s->base_len = particle_distance(p1, p2);
+      // If we don't square base_len, the square moves
+      // pretty much all at once without deforming.
+      s->k = 100.0 / (s->base_len * s->base_len);
+    }
+  }
+
+  return mesh;
+}
+
 void mesh_step(struct mesh* m, float time_frac) {
   for (int i = 0; i < m->num_springs; ++i) {
     struct spring* s = &m->springs[i];
