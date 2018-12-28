@@ -3,12 +3,28 @@
 #include "mesh.h"
 
 GtkWidget* window = NULL;
+GtkWidget* combo_box = NULL;
 GtkWidget* drawing_area = NULL;
 cairo_surface_t* surface = NULL;
 struct mesh* mesh = NULL;
 struct particle* dragging_particle = NULL;
 float drag_x = 0;
 float drag_y = 0;
+
+static gboolean combo_box_changed(GtkComboBox* widget, gpointer user_data) {
+  mesh_free(mesh);
+  switch (gtk_combo_box_get_active(GTK_COMBO_BOX(widget))) {
+    case 0:
+      mesh = mesh_new_grid(30.0f, 20.0f, 20.0f, 13, 13);
+      break;
+    case 1:
+      mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f);
+      break;
+    case 2:
+      mesh = mesh_new_edge_conn(30.0f, 20.0f, 20.0f, 13, 13);
+      break;
+  }
+}
 
 static void fill_white() {
   cairo_t* c = cairo_create(surface);
@@ -110,12 +126,9 @@ static void activate(GtkApplication* app, gpointer userData) {
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Mesh");
-  gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
+  gtk_window_set_default_size(GTK_WINDOW(window), 400, 450);
 
   drawing_area = gtk_drawing_area_new();
-  gtk_widget_set_size_request(drawing_area, 400, 400);
-  gtk_container_add(GTK_CONTAINER(window), drawing_area);
-
   g_signal_connect(drawing_area, "draw", G_CALLBACK(drawing_area_draw), NULL);
   g_signal_connect(drawing_area, "configure-event",
                    G_CALLBACK(drawing_area_configure), NULL);
@@ -125,11 +138,22 @@ static void activate(GtkApplication* app, gpointer userData) {
                    G_CALLBACK(mouse_released), NULL);
   g_signal_connect(drawing_area, "motion-notify-event", G_CALLBACK(mouse_moved),
                    NULL);
-
   gtk_widget_set_events(drawing_area, gtk_widget_get_events(drawing_area) |
                                           GDK_BUTTON_PRESS_MASK |
                                           GDK_BUTTON_RELEASE_MASK |
                                           GDK_POINTER_MOTION_MASK);
+
+  combo_box = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "Grid");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "FC");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "EdgeConn");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_box), 1);
+  g_signal_connect(combo_box, "changed", G_CALLBACK(combo_box_changed), NULL);
+
+  GtkWidget* container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_box_pack_start(GTK_BOX(container), combo_box, FALSE, FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(container), drawing_area, TRUE, TRUE, 0);
+  gtk_container_add(GTK_CONTAINER(window), container);
 
   gtk_widget_show_all(window);
 
