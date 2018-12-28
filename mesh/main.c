@@ -18,9 +18,12 @@ static gboolean combo_box_changed(GtkComboBox* widget, gpointer user_data) {
       mesh = mesh_new_grid(30.0f, 20.0f, 20.0f, 13, 13);
       break;
     case 1:
-      mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f);
+      mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f, 0);
       break;
     case 2:
+      mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f, 1);
+      break;
+    case 3:
       mesh = mesh_new_edge_conn(30.0f, 20.0f, 20.0f, 13, 13);
       break;
   }
@@ -122,7 +125,7 @@ static gboolean mouse_moved(GtkWidget* widget,
 }
 
 static void activate(GtkApplication* app, gpointer userData) {
-  mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f);
+  mesh = mesh_new_fc(30.0f, 20.0f, 20.0f, 13, 13, 100.0f, 1);
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Mesh");
@@ -146,8 +149,10 @@ static void activate(GtkApplication* app, gpointer userData) {
   combo_box = gtk_combo_box_text_new();
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "Grid");
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "FC");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box),
+                                 "FC + EdgeConn");
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo_box), "EdgeConn");
-  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_box), 1);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(combo_box), 2);
   g_signal_connect(combo_box, "changed", G_CALLBACK(combo_box_changed), NULL);
 
   GtkWidget* container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);

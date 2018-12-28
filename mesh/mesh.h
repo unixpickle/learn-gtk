@@ -35,7 +35,8 @@ struct mesh* mesh_new_fc(float spacing,
                          float y,
                          int rows,
                          int cols,
-                         float max_dist);
+                         float max_dist,
+                         char add_edges);
 struct mesh* mesh_new_edge_conn(float spacing,
                                 float x,
                                 float y,
