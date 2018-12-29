@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <strings.h>
 
+static struct spring* add_spring(struct mesh* mesh) {
+  mesh->springs =
+      realloc(mesh->springs, (mesh->num_springs + 1) * sizeof(struct spring));
+  return &mesh->springs[mesh->num_springs++];
+}
+
 static void add_grid_particles(struct mesh* mesh,
                                float spacing,
                                float x,
@@ -31,7 +37,7 @@ static void add_fully_conns(struct mesh* mesh, float max_dist) {
       struct particle* p1 = &mesh->particles[j];
       float d = particle_distance(p, p1);
       if (d <= max_dist) {
-        struct spring* s = &mesh->springs[mesh->num_springs++];
+        struct spring* s = add_spring(mesh);
         s->p1 = p1;
         s->p2 = p;
         s->base_len = particle_distance(p, p1);
@@ -52,7 +58,7 @@ static void add_edge_conns(struct mesh* mesh) {
         continue;
       }
       struct particle* p2 = &mesh->particles[j];
-      struct spring* s = &mesh->springs[mesh->num_springs++];
+      struct spring* s = add_spring(mesh);
       s->p1 = p1;
       s->p2 = p2;
       s->base_len = particle_distance(p1, p2);
@@ -78,22 +84,20 @@ struct mesh* mesh_new_grid(float spacing,
                            int cols) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  add_grid_particles(mesh, spacing, x, y, rows, cols);
-  mesh->num_springs = 2 * mesh->num_particles - (rows + cols);
-  mesh->springs = malloc(sizeof(struct spring) * mesh->num_springs);
   mesh->max_vel = 100;
   mesh->damping = 0.5;
 
-  int spring_idx = 0;
+  add_grid_particles(mesh, spacing, x, y, rows, cols);
+
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < cols; ++j) {
       struct particle* p = &mesh->particles[i * cols + j];
 
-#define ADD_SPRING                                 \
-  struct spring* s = &mesh->springs[spring_idx++]; \
-  s->p1 = p1;                                      \
-  s->p2 = p;                                       \
-  s->base_len = particle_distance(p, p1);          \
+#define ADD_SPRING                        \
+  struct spring* s = add_spring(mesh);    \
+  s->p1 = p1;                             \
+  s->p2 = p;                              \
+  s->base_len = particle_distance(p, p1); \
   s->k = 1.0
 
       if (j > 0) {
@@ -106,7 +110,6 @@ struct mesh* mesh_new_grid(float spacing,
       }
     }
   }
-  assert(spring_idx == mesh->num_springs);
 
   return mesh;
 }
@@ -120,12 +123,9 @@ struct mesh* mesh_new_fc(float spacing,
                          char add_edges) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  add_grid_particles(mesh, spacing, x, y, rows, cols);
-  mesh->num_springs = 0;
-  mesh->springs = malloc(sizeof(struct spring) * mesh->num_particles *
-                         mesh->num_particles * 2);
   mesh->max_vel = 200;
   mesh->damping = 0.5;
+  add_grid_particles(mesh, spacing, x, y, rows, cols);
   add_fully_conns(mesh, max_dist);
   if (add_edges) {
     add_edge_conns(mesh);
@@ -140,12 +140,9 @@ struct mesh* mesh_new_edge_conn(float spacing,
                                 int cols) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  add_grid_particles(mesh, spacing, x, y, rows, cols);
-  mesh->num_springs = 0;
-  mesh->springs = malloc(sizeof(struct spring) *
-                         ((rows * 2 + cols * 2 - 4) * mesh->num_particles));
   mesh->max_vel = 500;
   mesh->damping = 0.5;
+  add_grid_particles(mesh, spacing, x, y, rows, cols);
   add_edge_conns(mesh);
   return mesh;
 }
