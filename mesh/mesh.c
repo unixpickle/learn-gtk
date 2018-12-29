@@ -30,7 +30,31 @@ static void add_grid_particles(struct mesh* mesh,
   }
 }
 
-static void add_fully_conns(struct mesh* mesh, float max_dist) {
+static void add_grid_springs(struct mesh* mesh, int rows, int cols) {
+  for (int i = 0; i < rows; ++i) {
+    for (int j = 0; j < cols; ++j) {
+      struct particle* p = &mesh->particles[i * cols + j];
+
+#define ADD_SPRING                        \
+  struct spring* s = add_spring(mesh);    \
+  s->p1 = p1;                             \
+  s->p2 = p;                              \
+  s->base_len = particle_distance(p, p1); \
+  s->k = 1.0
+
+      if (j > 0) {
+        struct particle* p1 = &mesh->particles[i * cols + j - 1];
+        ADD_SPRING;
+      }
+      if (i > 0) {
+        struct particle* p1 = &mesh->particles[(i - 1) * cols + j];
+        ADD_SPRING;
+      }
+    }
+  }
+}
+
+static void add_fc_springs(struct mesh* mesh, float max_dist) {
   for (int i = 0; i < mesh->num_particles; ++i) {
     struct particle* p = &mesh->particles[i];
     for (int j = 0; j < i; ++j) {
@@ -47,7 +71,7 @@ static void add_fully_conns(struct mesh* mesh, float max_dist) {
   }
 }
 
-static void add_edge_conns(struct mesh* mesh) {
+static void add_edge_conn_springs(struct mesh* mesh) {
   for (int i = 0; i < mesh->num_particles; ++i) {
     struct particle* p1 = &mesh->particles[i];
     if (!p1->is_edge) {
@@ -86,31 +110,8 @@ struct mesh* mesh_new_grid(float spacing,
   bzero(mesh, sizeof(struct mesh));
   mesh->max_vel = 100;
   mesh->damping = 0.5;
-
   add_grid_particles(mesh, spacing, x, y, rows, cols);
-
-  for (int i = 0; i < rows; ++i) {
-    for (int j = 0; j < cols; ++j) {
-      struct particle* p = &mesh->particles[i * cols + j];
-
-#define ADD_SPRING                        \
-  struct spring* s = add_spring(mesh);    \
-  s->p1 = p1;                             \
-  s->p2 = p;                              \
-  s->base_len = particle_distance(p, p1); \
-  s->k = 1.0
-
-      if (j > 0) {
-        struct particle* p1 = &mesh->particles[i * cols + j - 1];
-        ADD_SPRING;
-      }
-      if (i > 0) {
-        struct particle* p1 = &mesh->particles[(i - 1) * cols + j];
-        ADD_SPRING;
-      }
-    }
-  }
-
+  add_grid_springs(mesh, rows, cols);
   return mesh;
 }
 
@@ -126,9 +127,9 @@ struct mesh* mesh_new_fc(float spacing,
   mesh->max_vel = 200;
   mesh->damping = 0.5;
   add_grid_particles(mesh, spacing, x, y, rows, cols);
-  add_fully_conns(mesh, max_dist);
+  add_fc_springs(mesh, max_dist);
   if (add_edges) {
-    add_edge_conns(mesh);
+    add_edge_conn_springs(mesh);
   }
   return mesh;
 }
@@ -143,7 +144,7 @@ struct mesh* mesh_new_edge_conn(float spacing,
   mesh->max_vel = 500;
   mesh->damping = 0.5;
   add_grid_particles(mesh, spacing, x, y, rows, cols);
-  add_edge_conns(mesh);
+  add_edge_conn_springs(mesh);
   return mesh;
 }
 
