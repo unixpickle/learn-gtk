@@ -8,14 +8,103 @@
 #include <gtk/gtk.h>
 
 static GLfloat vertices[] = {
-  -1.0f, -1.0f, -1.0f,
-   1.0f, -1.0f, -1.0f,
-   0.0f,  1.0f, -1.0f,
+  // Front face.
+  -0.6f, 0.6f, -1.0f,
+  -0.6f, 0.1f, -1.0f,
+  -0.1f, 0.1f, -1.0f,
+  -0.1f, 0.1f, -1.0f,
+  -0.1f, 0.6f, -1.0f,
+  -0.6f, 0.6f, -1.0f,
+
+  // Back face.
+  -0.6f, 0.6f, -1.5f,
+  -0.6f, 0.1f, -1.5f,
+  -0.1f, 0.1f, -1.5f,
+  -0.1f, 0.1f, -1.5f,
+  -0.1f, 0.6f, -1.5f,
+  -0.6f, 0.6f, -1.5f,
+
+  // Right face.
+  -0.1f, 0.1f, -1.0f,
+  -0.1f, 0.1f, -1.5f,
+  -0.1f, 0.6f, -1.5f,
+  -0.1f, 0.6f, -1.5f,
+  -0.1f, 0.6f, -1.0f,
+  -0.1f, 0.1f, -1.0f,
+
+  // Left face.
+  -0.6f, 0.1f, -1.0f,
+  -0.6f, 0.1f, -1.5f,
+  -0.6f, 0.6f, -1.5f,
+  -0.6f, 0.6f, -1.5f,
+  -0.6f, 0.6f, -1.0f,
+  -0.6f, 0.1f, -1.0f,
+
+  // Bottom face.
+  -0.6f, 0.1f, -1.0f,
+  -0.1f, 0.1f, -1.0f,
+  -0.1f, 0.1f, -1.5f,
+  -0.1f, 0.1f, -1.5f,
+  -0.6f, 0.1f, -1.5f,
+  -0.6f, 0.1f, -1.0f,
+
+  // Top face.
+  -0.6f, 0.6f, -1.0f,
+  -0.1f, 0.6f, -1.0f,
+  -0.1f, 0.6f, -1.5f,
+  -0.1f, 0.6f, -1.5f,
+  -0.6f, 0.6f, -1.5f,
+  -0.6f, 0.6f, -1.0f,
+};
+
+static GLfloat normals[] = {
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+  0.0f, 0.0f, 1.0f,
+
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+  1.0f, 0.0f, 0.0f,
+
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
 };
 
 static GLuint program;
 static GLuint vao;
-static GLuint buffer;
+static GLuint vertex_buffer;
+static GLuint normal_buffer;
 
 static GLuint load_shaders() {
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -26,17 +115,25 @@ static GLuint load_shaders() {
 
 	const char* vertex_shader_code = "\
     #version 330 core\n \
-    layout(location = 0) in vec3 vertexPosition_modelspace; \n \
+    layout (location = 0) in vec3 pos; \n \
+    layout (location = 1) in vec3 normal; \n \
+    varying vec3 vertex_normal; \n \
     void main() { \n \
-      gl_Position.xyz = vertexPosition_modelspace; \n \
-      gl_Position.w = 1.0; \n \
+      gl_Position.xyz = pos; \n \
+      gl_Position.w = -pos.z; \n \
+      vertex_normal = normal; \n \
     }";
 
   const char* fragment_shader_code = "\
     #version 330 core \n \
+    varying vec3 vertex_normal; \n \
     out vec3 color; \n \
     void main() { \n \
-      color = vec3(1, 0, 0); \n \
+      float bn = dot(vertex_normal, normalize(vec3(0.3, 0.4, 0.5))); \n \
+      if (bn < 0) { \n \
+        bn = -bn; \n \
+      } \n \
+      color = vec3(bn, 0, 0); \n \
     }";
 
 	GLint result = GL_FALSE;
@@ -55,7 +152,6 @@ static GLuint load_shaders() {
 		goto fail;
 	}
 
-	
 	glLinkProgram(program);
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
 	if (!result) {
@@ -83,30 +179,46 @@ fail:
 static gboolean render(GtkGLArea* area, GdkGLContext* ctx) {
   glClearColor(0, 0, 0, 0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClearDepth(1.0);
+
+  glEnable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glFrustum(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 20.0f);
+  glMatrixMode(GL_MODELVIEW);
 
   glUseProgram(program);
 
   glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
   glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
 
   return TRUE;
 }
 
-static void realize(GtkGLArea *glarea) {
-	gtk_gl_area_make_current(glarea);
-  gtk_gl_area_set_has_depth_buffer(glarea, TRUE);
+static void realize(GtkGLArea* area) {
+	gtk_gl_area_make_current(area);
+  gtk_gl_area_set_has_depth_buffer(area, TRUE);
 
   program = load_shaders();
 
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &normal_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
 }
 
 static void activate(GtkApplication* app, gpointer userData) {
