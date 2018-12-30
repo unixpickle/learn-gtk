@@ -114,10 +114,10 @@ static GLuint load_shaders() {
 	glAttachShader(program, fragment_shader);
 
 	const char* vertex_shader_code = "\
-    #version 330 core\n \
+    #version 400 core\n \
     layout (location = 0) in vec3 pos; \n \
     layout (location = 1) in vec3 normal; \n \
-    varying vec3 vertex_normal; \n \
+    out vec3 vertex_normal; \n \
     void main() { \n \
       gl_Position.xyz = pos; \n \
       gl_Position.z = pos.z * pos.z / 10; \n \
@@ -126,8 +126,8 @@ static GLuint load_shaders() {
     }";
 
   const char* fragment_shader_code = "\
-    #version 330 core \n \
-    varying vec3 vertex_normal; \n \
+    #version 400 core \n \
+    in vec3 vertex_normal; \n \
     out vec3 color; \n \
     void main() { \n \
       float bn = dot(vertex_normal, normalize(vec3(0.3, 0.4, 0.5))); \n \
