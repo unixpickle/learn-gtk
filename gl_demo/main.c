@@ -120,6 +120,7 @@ static GLuint load_shaders() {
     varying vec3 vertex_normal; \n \
     void main() { \n \
       gl_Position.xyz = pos; \n \
+      gl_Position.z = pos.z * pos.z / 10; \n \
       gl_Position.w = -pos.z; \n \
       vertex_normal = normal; \n \
     }";
