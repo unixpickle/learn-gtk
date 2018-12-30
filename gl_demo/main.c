@@ -6,55 +6,56 @@
 
 #include <GL/gl.h>
 #include <gtk/gtk.h>
+#include <math.h>
 
 static GLfloat vertices[] = {
   // Front face.
-  -0.6f, 0.6f, -1.0f,
-  -0.6f, 0.1f, -1.0f,
-  -0.1f, 0.1f, -1.0f,
-  -0.1f, 0.1f, -1.0f,
-  -0.1f, 0.6f, -1.0f,
-  -0.6f, 0.6f, -1.0f,
+  -0.25f, 0.25f, -1.0f,
+  -0.25f, -0.25f, -1.0f,
+  0.25f, -0.25f, -1.0f,
+  0.25f, -0.25f, -1.0f,
+  0.25f, 0.25f, -1.0f,
+  -0.25f, 0.25f, -1.0f,
 
   // Back face.
-  -0.6f, 0.6f, -1.5f,
-  -0.6f, 0.1f, -1.5f,
-  -0.1f, 0.1f, -1.5f,
-  -0.1f, 0.1f, -1.5f,
-  -0.1f, 0.6f, -1.5f,
-  -0.6f, 0.6f, -1.5f,
+  -0.25f, 0.25f, -1.5f,
+  -0.25f, -0.25f, -1.5f,
+  0.25f, -0.25f, -1.5f,
+  0.25f, -0.25f, -1.5f,
+  0.25f, 0.25f, -1.5f,
+  -0.25f, 0.25f, -1.5f,
 
   // Right face.
-  -0.1f, 0.1f, -1.0f,
-  -0.1f, 0.1f, -1.5f,
-  -0.1f, 0.6f, -1.5f,
-  -0.1f, 0.6f, -1.5f,
-  -0.1f, 0.6f, -1.0f,
-  -0.1f, 0.1f, -1.0f,
+  0.25f, -0.25f, -1.0f,
+  0.25f, -0.25f, -1.5f,
+  0.25f, 0.25f, -1.5f,
+  0.25f, 0.25f, -1.5f,
+  0.25f, 0.25f, -1.0f,
+  0.25f, -0.25f, -1.0f,
 
   // Left face.
-  -0.6f, 0.1f, -1.0f,
-  -0.6f, 0.1f, -1.5f,
-  -0.6f, 0.6f, -1.5f,
-  -0.6f, 0.6f, -1.5f,
-  -0.6f, 0.6f, -1.0f,
-  -0.6f, 0.1f, -1.0f,
+  -0.25f, -0.25f, -1.0f,
+  -0.25f, -0.25f, -1.5f,
+  -0.25f, 0.25f, -1.5f,
+  -0.25f, 0.25f, -1.5f,
+  -0.25f, 0.25f, -1.0f,
+  -0.25f, -0.25f, -1.0f,
 
   // Bottom face.
-  -0.6f, 0.1f, -1.0f,
-  -0.1f, 0.1f, -1.0f,
-  -0.1f, 0.1f, -1.5f,
-  -0.1f, 0.1f, -1.5f,
-  -0.6f, 0.1f, -1.5f,
-  -0.6f, 0.1f, -1.0f,
+  -0.25f, -0.25f, -1.0f,
+  0.25f, -0.25f, -1.0f,
+  0.25f, -0.25f, -1.5f,
+  0.25f, -0.25f, -1.5f,
+  -0.25f, -0.25f, -1.5f,
+  -0.25f, -0.25f, -1.0f,
 
   // Top face.
-  -0.6f, 0.6f, -1.0f,
-  -0.1f, 0.6f, -1.0f,
-  -0.1f, 0.6f, -1.5f,
-  -0.1f, 0.6f, -1.5f,
-  -0.6f, 0.6f, -1.5f,
-  -0.6f, 0.6f, -1.0f,
+  -0.25f, 0.25f, -1.0f,
+  0.25f, 0.25f, -1.0f,
+  0.25f, 0.25f, -1.5f,
+  0.25f, 0.25f, -1.5f,
+  -0.25f, 0.25f, -1.5f,
+  -0.25f, 0.25f, -1.0f,
 };
 
 static GLfloat normals[] = {
@@ -101,10 +102,12 @@ static GLfloat normals[] = {
   0.0f, 1.0f, 0.0f,
 };
 
+GtkWidget* gl_area;
 static GLuint program;
 static GLuint vao;
 static GLuint vertex_buffer;
 static GLuint normal_buffer;
+static float current_time = 0;
 
 static GLuint load_shaders() {
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -115,13 +118,14 @@ static GLuint load_shaders() {
 
 	const char* vertex_shader_code = "\
     #version 400 core\n \
-    layout (location = 0) in vec3 pos; \n \
-    layout (location = 1) in vec3 normal; \n \
+    layout(location = 0) in vec3 pos; \n \
+    layout(location = 1) in vec3 normal; \n \
+    uniform vec3 translation; \n \
     out vec3 vertex_normal; \n \
     void main() { \n \
-      gl_Position.xyz = pos; \n \
-      gl_Position.z = pos.z * pos.z / 10; \n \
-      gl_Position.w = -pos.z; \n \
+      gl_Position.xyz = pos + translation; \n \
+      gl_Position.w = -gl_Position.z; \n \
+      gl_Position.z = gl_Position.z * gl_Position.z / 20; \n \
       vertex_normal = normal; \n \
     }";
 
@@ -193,10 +197,16 @@ static gboolean render(GtkGLArea* area, GdkGLContext* ctx) {
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
+  
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  current_time += 0.05;
+  glUniform3f(glGetUniformLocation(program, "translation"),
+              cos(current_time) * 0.7, sin(current_time) * 0.7, 0);
+
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);
@@ -222,15 +232,22 @@ static void realize(GtkGLArea* area) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
 }
 
+static gboolean perform_step(gpointer data) {
+  gtk_gl_area_queue_render(GTK_GL_AREA(gl_area));
+  return TRUE;
+}
+
 static void activate(GtkApplication* app, gpointer userData) {
   GtkWidget* window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "GL Demo");
   gtk_window_set_default_size(GTK_WINDOW(window), 400, 400);
 
-  GtkWidget* gl_area = gtk_gl_area_new();
+  gl_area = gtk_gl_area_new();
   g_signal_connect(gl_area, "render", G_CALLBACK(render), NULL);
   g_signal_connect(gl_area, "realize", G_CALLBACK(realize), NULL);
   gtk_container_add(GTK_CONTAINER(window), gl_area);
+
+  gdk_threads_add_timeout(42, perform_step, NULL);
 
   gtk_widget_show_all(window);
 }
