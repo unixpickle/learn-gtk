@@ -7,10 +7,10 @@
 #define PROGRESS_FAILURE ((float)-1.0)
 
 gboolean video_duration(const char* path, double* duration);
-void cut_video(char* inPath,
-               char* outPath,
+void cut_video(char* in_path,
+               char* out_path,
                double start,
                double end,
-               GSourceFunc progressCb);
+               GSourceFunc progress_cb);
 
 #endif

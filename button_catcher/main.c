@@ -1,18 +1,18 @@
 #include <gtk/gtk.h>
 
-GtkWidget* buttonBox = NULL;
+GtkWidget* button_box = NULL;
 GtkWidget* fixed = NULL;
 GtkWidget* window = NULL;
 
 static void randomize_button() {
-  GtkAllocation butRect;
-  gtk_widget_get_clip(buttonBox, &butRect);
-  gint winWidth, winHeight;
-  gtk_window_get_size(GTK_WINDOW(window), &winWidth, &winHeight);
+  GtkAllocation but_rect;
+  gtk_widget_get_clip(button_box, &but_rect);
+  gint win_width, win_height;
+  gtk_window_get_size(GTK_WINDOW(window), &win_width, &win_height);
 
-  gint x = rand() % (winWidth - butRect.width);
-  gint y = rand() % (winHeight - butRect.height);
-  gtk_fixed_move(GTK_FIXED(fixed), buttonBox, x, y);
+  gint x = rand() % (win_width - but_rect.width);
+  gint y = rand() % (win_height - but_rect.height);
+  gtk_fixed_move(GTK_FIXED(fixed), button_box, x, y);
 }
 
 static void on_key_press(GtkWidget* widget,
@@ -38,11 +38,11 @@ static void activate(GtkApplication* app, gpointer userData) {
   GtkWidget* button = gtk_button_new_with_label("Click Me");
   g_signal_connect(button, "clicked", G_CALLBACK(on_button_press), NULL);
 
-  buttonBox = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-  gtk_container_add(GTK_CONTAINER(buttonBox), button);
+  button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_container_add(GTK_CONTAINER(button_box), button);
 
   fixed = gtk_fixed_new();
-  gtk_fixed_put(GTK_FIXED(fixed), buttonBox, 0, 0);
+  gtk_fixed_put(GTK_FIXED(fixed), button_box, 0, 0);
   randomize_button();
   gtk_container_add(GTK_CONTAINER(window), fixed);
 
