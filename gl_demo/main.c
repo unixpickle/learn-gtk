@@ -20,6 +20,9 @@ static GLuint buffer;
 static GLuint load_shaders() {
 	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	GLuint program = glCreateProgram();
+  glAttachShader(program, vertex_shader);
+	glAttachShader(program, fragment_shader);
 
 	const char* vertex_shader_code = "\
     #version 330 core\n \
@@ -52,9 +55,7 @@ static GLuint load_shaders() {
 		goto fail;
 	}
 
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vertex_shader);
-	glAttachShader(program, fragment_shader);
+	
 	glLinkProgram(program);
 	glGetProgramiv(program, GL_LINK_STATUS, &result);
 	if (!result) {
@@ -69,6 +70,12 @@ static GLuint load_shaders() {
 	return program;
 
 fail:
+  glDetachShader(program, vertex_shader);
+	glDetachShader(program, fragment_shader);
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
+  glDeleteProgram(program);
+
   printf("failed to create shaders.\n");
   exit(1);
 }
