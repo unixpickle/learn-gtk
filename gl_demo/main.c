@@ -9,97 +9,145 @@
 #include <math.h>
 
 static GLfloat vertices[] = {
-  // Front face.
-  -0.25f, 0.25f, -1.0f,
-  -0.25f, -0.25f, -1.0f,
-  0.25f, -0.25f, -1.0f,
-  0.25f, -0.25f, -1.0f,
-  0.25f, 0.25f, -1.0f,
-  -0.25f, 0.25f, -1.0f,
+    // Front face.
+    -0.25f,
+    0.25f,
+    -1.0f,
+    -0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    0.25f,
+    -1.0f,
+    -0.25f,
+    0.25f,
+    -1.0f,
 
-  // Back face.
-  -0.25f, 0.25f, -1.5f,
-  -0.25f, -0.25f, -1.5f,
-  0.25f, -0.25f, -1.5f,
-  0.25f, -0.25f, -1.5f,
-  0.25f, 0.25f, -1.5f,
-  -0.25f, 0.25f, -1.5f,
+    // Back face.
+    -0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    -0.25f,
+    -1.5f,
+    0.25f,
+    -0.25f,
+    -1.5f,
+    0.25f,
+    -0.25f,
+    -1.5f,
+    0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.5f,
 
-  // Right face.
-  0.25f, -0.25f, -1.0f,
-  0.25f, -0.25f, -1.5f,
-  0.25f, 0.25f, -1.5f,
-  0.25f, 0.25f, -1.5f,
-  0.25f, 0.25f, -1.0f,
-  0.25f, -0.25f, -1.0f,
+    // Right face.
+    0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.5f,
+    0.25f,
+    0.25f,
+    -1.5f,
+    0.25f,
+    0.25f,
+    -1.5f,
+    0.25f,
+    0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.0f,
 
-  // Left face.
-  -0.25f, -0.25f, -1.0f,
-  -0.25f, -0.25f, -1.5f,
-  -0.25f, 0.25f, -1.5f,
-  -0.25f, 0.25f, -1.5f,
-  -0.25f, 0.25f, -1.0f,
-  -0.25f, -0.25f, -1.0f,
+    // Left face.
+    -0.25f,
+    -0.25f,
+    -1.0f,
+    -0.25f,
+    -0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.0f,
+    -0.25f,
+    -0.25f,
+    -1.0f,
 
-  // Bottom face.
-  -0.25f, -0.25f, -1.0f,
-  0.25f, -0.25f, -1.0f,
-  0.25f, -0.25f, -1.5f,
-  0.25f, -0.25f, -1.5f,
-  -0.25f, -0.25f, -1.5f,
-  -0.25f, -0.25f, -1.0f,
+    // Bottom face.
+    -0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.0f,
+    0.25f,
+    -0.25f,
+    -1.5f,
+    0.25f,
+    -0.25f,
+    -1.5f,
+    -0.25f,
+    -0.25f,
+    -1.5f,
+    -0.25f,
+    -0.25f,
+    -1.0f,
 
-  // Top face.
-  -0.25f, 0.25f, -1.0f,
-  0.25f, 0.25f, -1.0f,
-  0.25f, 0.25f, -1.5f,
-  0.25f, 0.25f, -1.5f,
-  -0.25f, 0.25f, -1.5f,
-  -0.25f, 0.25f, -1.0f,
+    // Top face.
+    -0.25f,
+    0.25f,
+    -1.0f,
+    0.25f,
+    0.25f,
+    -1.0f,
+    0.25f,
+    0.25f,
+    -1.5f,
+    0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.5f,
+    -0.25f,
+    0.25f,
+    -1.0f,
 };
 
 static GLfloat normals[] = {
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
-  0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
-  1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
-  0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 };
 
 GtkWidget* gl_area;
@@ -110,13 +158,14 @@ static GLuint normal_buffer;
 static float current_time = 0;
 
 static GLuint load_shaders() {
-	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	GLuint program = glCreateProgram();
+  GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  GLuint program = glCreateProgram();
   glAttachShader(program, vertex_shader);
-	glAttachShader(program, fragment_shader);
+  glAttachShader(program, fragment_shader);
 
-	const char* vertex_shader_code = "\
+  const char* vertex_shader_code =
+      "\
     #version 400 core\n \
     layout(location = 0) in vec3 pos; \n \
     layout(location = 1) in vec3 normal; \n \
@@ -129,7 +178,8 @@ static GLuint load_shaders() {
       vertex_normal = normal; \n \
     }";
 
-  const char* fragment_shader_code = "\
+  const char* fragment_shader_code =
+      "\
     #version 400 core \n \
     in vec3 vertex_normal; \n \
     out vec3 color; \n \
@@ -141,40 +191,40 @@ static GLuint load_shaders() {
       color = vec3(bn, 0, 0); \n \
     }";
 
-	GLint result = GL_FALSE;
+  GLint result = GL_FALSE;
 
-	glShaderSource(vertex_shader, 1, &vertex_shader_code, NULL);
-	glCompileShader(vertex_shader);
-	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &result);
-	if (!result) {
+  glShaderSource(vertex_shader, 1, &vertex_shader_code, NULL);
+  glCompileShader(vertex_shader);
+  glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &result);
+  if (!result) {
     goto fail;
-	}
+  }
 
-	glShaderSource(fragment_shader, 1, &fragment_shader_code , NULL);
-	glCompileShader(fragment_shader);
-	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &result);
-	if (!result) {
-		goto fail;
-	}
+  glShaderSource(fragment_shader, 1, &fragment_shader_code, NULL);
+  glCompileShader(fragment_shader);
+  glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &result);
+  if (!result) {
+    goto fail;
+  }
 
-	glLinkProgram(program);
-	glGetProgramiv(program, GL_LINK_STATUS, &result);
-	if (!result) {
-		goto fail;
-	}
+  glLinkProgram(program);
+  glGetProgramiv(program, GL_LINK_STATUS, &result);
+  if (!result) {
+    goto fail;
+  }
 
-	glDetachShader(program, vertex_shader);
-	glDetachShader(program, fragment_shader);
-	glDeleteShader(vertex_shader);
-	glDeleteShader(fragment_shader);
+  glDetachShader(program, vertex_shader);
+  glDetachShader(program, fragment_shader);
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
 
-	return program;
+  return program;
 
 fail:
   glDetachShader(program, vertex_shader);
-	glDetachShader(program, fragment_shader);
-	glDeleteShader(vertex_shader);
-	glDeleteShader(fragment_shader);
+  glDetachShader(program, fragment_shader);
+  glDeleteShader(vertex_shader);
+  glDeleteShader(fragment_shader);
   glDeleteProgram(program);
 
   printf("failed to create shaders.\n");
@@ -197,7 +247,7 @@ static gboolean render(GtkGLArea* area, GdkGLContext* ctx) {
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
-  
+
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
@@ -215,7 +265,7 @@ static gboolean render(GtkGLArea* area, GdkGLContext* ctx) {
 }
 
 static void realize(GtkGLArea* area) {
-	gtk_gl_area_make_current(area);
+  gtk_gl_area_make_current(area);
   gtk_gl_area_set_has_depth_buffer(area, TRUE);
 
   program = load_shaders();
