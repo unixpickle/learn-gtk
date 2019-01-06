@@ -7,7 +7,7 @@ Learning how to use GTK+ for creating GUIs.
 Here's how to install the dependencies on Ubuntu 18.04:
 
 ```shell
-sudo apt install -y libgtk-3-dev libavformat-dev libavcodec-dev
+sudo apt install -y libgtk-3-dev libavformat-dev libavcodec-dev libgl1-mesa-dev
 ```
 
 Then you can build the demos via:
