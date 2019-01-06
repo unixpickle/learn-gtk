@@ -1,12 +1,19 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-struct particle {
+struct physics_state {
   float x;
   float y;
   float vx;
   float vy;
+};
+
+struct particle {
+  struct physics_state s;
   char is_edge;
+
+  struct physics_state _tmp_1;
+  struct physics_state _tmp_2;
 };
 
 struct spring {
@@ -28,6 +35,7 @@ struct mesh {
 };
 
 float particle_distance(struct particle* p1, struct particle* p2);
+float physics_distance(struct physics_state* p1, struct physics_state* p2);
 
 struct mesh* mesh_new_grid(float spacing, float x, float y, int rows, int cols);
 struct mesh* mesh_new_fc(float spacing,

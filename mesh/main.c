@@ -70,7 +70,7 @@ static gboolean drawing_area_draw(GtkWidget* widget,
   for (int i = 0; i < mesh->num_particles; ++i) {
     struct particle* p = &mesh->particles[i];
     cairo_new_sub_path(c);
-    cairo_arc(c, p->x, p->y, p->is_edge ? 5 : 2, 0, (float)M_PI * 2.0f);
+    cairo_arc(c, p->s.x, p->s.y, p->is_edge ? 5 : 2, 0, (float)M_PI * 2.0f);
     cairo_close_path(c);
     cairo_fill(c);
   }
@@ -81,8 +81,8 @@ static gboolean drawing_area_draw(GtkWidget* widget,
 static gboolean perform_step(gpointer data) {
   mesh_step(mesh, 1.0 / 24.0);
   if (dragging_particle) {
-    dragging_particle->x = drag_x;
-    dragging_particle->y = drag_y;
+    dragging_particle->s.x = drag_x;
+    dragging_particle->s.y = drag_y;
   }
   gtk_widget_queue_draw(drawing_area);
   return TRUE;
@@ -92,8 +92,8 @@ static gboolean mouse_pressed(GtkWidget* widget,
                               GdkEventButton* event,
                               gpointer data) {
   struct particle p;
-  p.x = event->x;
-  p.y = event->y;
+  p.s.x = event->x;
+  p.s.y = event->y;
   float distance = 1000000.0f;
   for (int i = 0; i < mesh->num_particles; ++i) {
     struct particle* other = &mesh->particles[i];

@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#define MAX_VEL 1000
+#define DAMPING 0.5
+
 static struct spring* add_spring(struct mesh* mesh) {
   mesh->springs =
       realloc(mesh->springs, (mesh->num_springs + 1) * sizeof(struct spring));
@@ -21,10 +24,10 @@ static void add_grid_particles(struct mesh* mesh,
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < cols; ++j) {
       struct particle* p = &mesh->particles[i * cols + j];
-      p->x = x + (float)j * spacing;
-      p->y = y + (float)i * spacing;
-      p->vx = 0;
-      p->vy = 0;
+      p->s.x = x + (float)j * spacing;
+      p->s.y = y + (float)i * spacing;
+      p->s.vx = 0;
+      p->s.vy = 0;
       p->is_edge = i == 0 || i == rows - 1 || j == 0 || j == cols - 1;
     }
   }
@@ -97,8 +100,85 @@ static float mag(float x, float y) {
   return sqrt(x * x + y * y);
 }
 
-float particle_distance(struct particle* p1, struct particle* p2) {
+static struct physics_state* _get_phys_state(struct particle* p, int idx) {
+  if (idx == 0) {
+    return &p->s;
+  } else if (idx == 1) {
+    return &p->_tmp_1;
+  } else if (idx == 2) {
+    return &p->_tmp_2;
+  }
+  return NULL;
+}
+
+static void _mesh_step(struct mesh* m, float time_frac, int substep) {
+  for (int i = 0; i < m->num_particles; ++i) {
+    struct particle* p = &m->particles[i];
+    *_get_phys_state(p, substep + 1) = *_get_phys_state(p, substep);
+  }
+
+  for (int i = 0; i < m->num_springs; ++i) {
+    struct spring* s = &m->springs[i];
+    struct physics_state* p1 = _get_phys_state(s->p1, substep + 1);
+    struct physics_state* p2 = _get_phys_state(s->p2, substep + 1);
+    float dist = physics_distance(p1, p2);
+    float force = s->k * (dist - s->base_len);
+    p1->vx += time_frac * force * (p2->x - p1->x);
+    p1->vy += time_frac * force * (p2->y - p1->y);
+    p2->vx -= time_frac * force * (p2->x - p1->x);
+    p2->vy -= time_frac * force * (p2->y - p1->y);
+  }
+
+  for (int i = 0; i < m->num_particles; ++i) {
+    struct particle* p = &m->particles[i];
+
+    struct physics_state* p_old = _get_phys_state(p, substep);
+    struct physics_state* p_new = _get_phys_state(p, substep + 1);
+
+    float vdamp = pow(m->damping, time_frac);
+    p_new->vx *= vdamp;
+    p_new->vy *= vdamp;
+
+    float vmag = mag(p_new->vx, p_new->vy);
+    if (vmag > m->max_vel) {
+      float scale = m->max_vel / vmag;
+      p_new->vx *= scale;
+      p_new->vy *= scale;
+    }
+
+    p_new->x += time_frac * p_old->vx;
+    p_new->y += time_frac * p_old->vy;
+  }
+}
+
+static void _mesh_step_final(struct mesh* m) {
+  for (int i = 0; i < m->num_particles; ++i) {
+    struct particle* p = &m->particles[i];
+
+    // The RK2 algorithm, which ends up being unstable:
+    // p->s.x += 0.5 * ((p->_tmp_2.x - p->_tmp_1.x) + (p->_tmp_1.x - p->s.x));
+    // p->s.y += 0.5 * ((p->_tmp_2.y - p->_tmp_1.y) + (p->_tmp_1.y - p->s.y));
+    // p->s.vx += 0.5 * ((p->_tmp_2.vx - p->_tmp_1.vx) + (p->_tmp_1.vx -
+    // p->s.vx)); p->s.vy += 0.5 * ((p->_tmp_2.vy - p->_tmp_1.vy) +
+    // (p->_tmp_1.vy - p->s.vy));
+
+    // The forward Euler algorithm, which is fairly ustable:
+    // p->s = p->_tmp_1;
+
+    // The backward Euler algorithm, which is stable:
+    p->s.x += p->_tmp_2.x - p->_tmp_1.x;
+    p->s.y += p->_tmp_2.y - p->_tmp_1.y;
+    p->s.vx += p->_tmp_2.vx - p->_tmp_1.vx;
+    p->s.vy += p->_tmp_2.vy - p->_tmp_1.vy;
+  }
+}
+
+float physics_distance(struct physics_state* p1, struct physics_state* p2) {
   return mag(p1->x - p2->x, p1->y - p2->y);
+}
+
+float particle_distance(struct particle* p1, struct particle* p2) {
+  return physics_distance(&p1->s, &p2->s);
 }
 
 struct mesh* mesh_new_grid(float spacing,
@@ -108,8 +188,8 @@ struct mesh* mesh_new_grid(float spacing,
                            int cols) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  mesh->max_vel = 100;
-  mesh->damping = 0.5;
+  mesh->max_vel = MAX_VEL;
+  mesh->damping = DAMPING;
   add_grid_particles(mesh, spacing, x, y, rows, cols);
   add_grid_springs(mesh, rows, cols);
   return mesh;
@@ -124,8 +204,8 @@ struct mesh* mesh_new_fc(float spacing,
                          char add_edges) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  mesh->max_vel = 200;
-  mesh->damping = 0.5;
+  mesh->max_vel = MAX_VEL;
+  mesh->damping = DAMPING;
   add_grid_particles(mesh, spacing, x, y, rows, cols);
   add_fc_springs(mesh, max_dist);
   if (add_edges) {
@@ -141,41 +221,17 @@ struct mesh* mesh_new_edge_conn(float spacing,
                                 int cols) {
   struct mesh* mesh = malloc(sizeof(struct mesh));
   bzero(mesh, sizeof(struct mesh));
-  mesh->max_vel = 500;
-  mesh->damping = 0.5;
+  mesh->max_vel = MAX_VEL;
+  mesh->damping = DAMPING;
   add_grid_particles(mesh, spacing, x, y, rows, cols);
   add_edge_conn_springs(mesh);
   return mesh;
 }
 
 void mesh_step(struct mesh* m, float time_frac) {
-  for (int i = 0; i < m->num_springs; ++i) {
-    struct spring* s = &m->springs[i];
-    float dist = particle_distance(s->p1, s->p2);
-    float force = s->k * (dist - s->base_len);
-    s->p1->vx += time_frac * force * (s->p2->x - s->p1->x);
-    s->p1->vy += time_frac * force * (s->p2->y - s->p1->y);
-    s->p2->vx -= time_frac * force * (s->p2->x - s->p1->x);
-    s->p2->vy -= time_frac * force * (s->p2->y - s->p1->y);
-  }
-
-  for (int i = 0; i < m->num_particles; ++i) {
-    struct particle* p = &m->particles[i];
-
-    float vdamp = pow(m->damping, time_frac);
-    p->vx *= vdamp;
-    p->vy *= vdamp;
-
-    float vmag = mag(p->vx, p->vy);
-    if (vmag > m->max_vel) {
-      float scale = m->max_vel / vmag;
-      p->vx *= scale;
-      p->vy *= scale;
-    }
-
-    p->x += time_frac * p->vx;
-    p->y += time_frac * p->vy;
-  }
+  _mesh_step(m, time_frac, 0);
+  _mesh_step(m, time_frac, 1);
+  _mesh_step_final(m);
 }
 
 void mesh_free(struct mesh* m) {
